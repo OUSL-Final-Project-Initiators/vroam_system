@@ -606,28 +606,30 @@
         <div class="row g-3 justify-content-center">
             @php
                 $cats = [
-                    ['name' => 'Bicycles',               'img' => 'Untitled design (1).png',  'icon' => 'fa-bicycle'],
-                    ['name' => 'Motorcycles',            'img' => 'Untitled design (2).png',  'icon' => 'fa-motorcycle'],
-                    ['name' => 'Cars',                   'img' => 'Untitled design (3).png',  'icon' => 'fa-car'],
-                    ['name' => 'SUVs',                   'img' => 'Untitled design (4).png',  'icon' => 'fa-truck-pickup'],
-                    ['name' => 'Vans',                   'img' => 'Untitled design (14).png',  'icon' => 'fa-van-shuttle'],
-                    ['name' => 'Trucks',                 'img' => 'Untitled design (10).png',  'icon' => 'fa-truck'],
-                    ['name' => 'Agricultural Vehicles',  'img' => 'Untitled design (11).png',  'icon' => 'fa-tractor'],
-                    ['name' => 'Construction Vehicles',  'img' => 'Untitled design (12).png',  'icon' => 'fa-helmet-safety'],
-                    ['name' => 'Special Vehicles',       'img' => 'Untitled design (13).png',  'icon' => 'fa-star'],
-                    ['name' => 'Camper Vehicles',        'img' => 'Untitled design (14).png', 'icon' => 'fa-caravan'],
+                    ['name' => 'Bicycles',               'slug' => 'bicycles',               'img' => 'Untitled design (1).png',  'icon' => 'fa-bicycle'],
+                    ['name' => 'Motorcycles',            'slug' => 'motorcycles',            'img' => 'Untitled design (2).png',  'icon' => 'fa-motorcycle'],
+                    ['name' => 'Cars',                   'slug' => 'cars',                   'img' => 'Untitled design (3).png',  'icon' => 'fa-car'],
+                    ['name' => 'SUVs',                   'slug' => 'suvs',                   'img' => 'Untitled design (4).png',  'icon' => 'fa-truck-pickup'],
+                    ['name' => 'Vans',                   'slug' => 'vans',                   'img' => 'Untitled design (14).png', 'icon' => 'fa-van-shuttle'],
+                    ['name' => 'Trucks',                 'slug' => 'trucks',                 'img' => 'Untitled design (10).png', 'icon' => 'fa-truck'],
+                    ['name' => 'Agricultural Vehicles',  'slug' => 'agricultural-vehicles',  'img' => 'Untitled design (11).png', 'icon' => 'fa-tractor'],
+                    ['name' => 'Construction Vehicles',  'slug' => 'construction-vehicles',  'img' => 'Untitled design (12).png', 'icon' => 'fa-helmet-safety'],
+                    ['name' => 'Special Vehicles',       'slug' => 'special-vehicles',       'img' => 'Untitled design (13).png', 'icon' => 'fa-star'],
+                    ['name' => 'Camper Vehicles',        'slug' => 'camper-vehicles',        'img' => 'Untitled design (14).png', 'icon' => 'fa-caravan'],
                 ];
             @endphp
             @foreach($cats as $cat)
             <div class="col-md-2 col-6">
-                <div class="category-card">
-                    <img src="{{ asset('assests/images/' . $cat['img']) }}" alt="{{ $cat['name'] }}"
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                    <div style="display:none; width:75px; height:75px; background:#e8faf0; border-radius:50%; align-items:center; justify-content:center; margin:0 auto 12px;">
-                        <i class="fa-solid {{ $cat['icon'] }} fa-2x" style="color: var(--primary-green);"></i>
+                <a href="{{ route('user.category', $cat['slug']) }}" style="text-decoration: none; color: inherit;">
+                    <div class="category-card">
+                        <img src="{{ asset('assests/images/' . $cat['img']) }}" alt="{{ $cat['name'] }}"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                        <div style="display:none; width:75px; height:75px; background:#e8faf0; border-radius:50%; align-items:center; justify-content:center; margin:0 auto 12px;">
+                            <i class="fa-solid {{ $cat['icon'] }} fa-2x" style="color: var(--primary-green);"></i>
+                        </div>
+                        <h6>{{ $cat['name'] }}</h6>
                     </div>
-                    <h6>{{ $cat['name'] }}</h6>
-                </div>
+                </a>
             </div>
             @endforeach
         </div>

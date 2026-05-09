@@ -16,12 +16,10 @@ class UserhomepageController extends Controller
 
             $query = Vehicle::where('status', 'available');
 
-            // Filter by vehicle category if selected
             if ($request->filled('vehicle_type') && $request->vehicle_type !== 'Select Category') {
                 $query->where('vehicle_category', 'like', '%' . $request->vehicle_type . '%');
             }
 
-            // Filter by location if entered
             if ($request->filled('location')) {
                 $query->where('location', 'like', '%' . $request->location . '%');
             }
@@ -30,5 +28,31 @@ class UserhomepageController extends Controller
         }
 
         return view('userhomepage.index', compact('vehicles', 'searched'));
+    }
+
+    public function category(string $category)
+    {
+        // Map URL-friendly slug back to the DB value
+        $categoryMap = [
+            'bicycles'               => 'Bicycle',
+            'motorcycles'            => 'Motorcycle',
+            'cars'                   => 'Car',
+            'suvs'                   => 'SUV',
+            'vans'                   => 'Van',
+            'trucks'                 => 'Truck',
+            'agricultural-vehicles'  => 'Agricultural Vehicle',
+            'construction-vehicles'  => 'Construction Vehicle',
+            'camper-vehicles'        => 'Camper Vehicle',
+            'special-vehicles'       => 'Special Vehicle',
+        ];
+
+        $dbCategory = $categoryMap[strtolower($category)] ?? $category;
+
+        // Newest listings first (latest created_at at the top)
+        $vehicles = Vehicle::where('vehicle_category', $dbCategory)
+                           ->orderBy('created_at', 'desc')
+                           ->get();
+
+        return view('userhomepage.category', compact('vehicles', 'dbCategory'));
     }
 }
