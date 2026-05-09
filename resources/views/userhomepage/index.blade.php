@@ -1,451 +1,320 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VROAM - Vehicle Rental on Any Mode</title>
+@extends('layouts.app')
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@section('title', 'VROAM - Vehicle Rental on Any Mode')
 
-    <style>
-        :root {
-            --primary-green: #18c24a;
-            --dark-green: #13a03d;
-            --light-bg: #f4f6f9;
-            --card-shadow: 0 4px 18px rgba(0,0,0,0.08);
-            --text-dark: #1a1a2e;
-            --text-muted: #6c757d;
-        }
+@push('styles')
+<style>
+    body { background: white; }
 
-        * { box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; color: var(--text-dark); overflow-x: hidden; }
+    /* ── Hero ── */
+    .hero {
+        background: linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.58)),
+                    url('{{ asset("assests/images/photorealistic-view-off-road-car-with-nature-terrain-weather-conditions (2).jpg") }}') center/cover no-repeat;
+        min-height: 620px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        padding: 60px 0 40px;
+    }
+    .hero h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+    .hero p { font-size: 1rem; opacity: 0.9; margin-bottom: 22px; }
+    .hero-btn-browse {
+        background: var(--primary-green);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 11px 32px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-right: 10px;
+        transition: 0.3s;
+    }
+    .hero-btn-browse:hover { background: var(--dark-green); color: white; }
+    .hero-btn-find {
+        background: transparent;
+        color: white;
+        border: 2px solid white;
+        border-radius: 30px;
+        padding: 11px 32px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: 0.3s;
+    }
+    .hero-btn-find:hover { background: white; color: var(--text-dark); }
 
-        /* ── Top Bar ── */
-        .top-bar {
-            background: var(--primary-green);
-            color: white;
-            text-align: center;
-            padding: 6px 15px;
-            font-size: 12.5px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-        }
+    /* ── Search Box ── */
+    .search-container { width: 96%; max-width: 1140px; margin-top: 32px; }
+    .search-box {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 14px;
+        padding: 24px 28px;
+    }
+    .search-box label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+    .search-box .form-control,
+    .search-box .form-select,
+    .search-box .input-group-text {
+        border: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        background: white;
+    }
+    .search-box .input-group .form-control { border-radius: 0 8px 8px 0; }
+    .search-box .input-group-text { border-radius: 8px 0 0 8px; border-right: 1px solid #eee; }
+    .btn-show-vehicles {
+        background: var(--primary-green);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 10px;
+        width: 100%;
+        transition: 0.3s;
+    }
+    .btn-show-vehicles:hover { background: var(--dark-green); }
 
-        /* ── Navbar ── */
-        .navbar {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .navbar-brand img { width: 44px; height: 44px; object-fit: contain; }
-        .navbar-brand span { font-size: 1.6rem; font-weight: 800; color: var(--primary-green); letter-spacing: -0.5px; }
-        .nav-link {
-            font-weight: 600;
-            color: #333 !important;
-            text-transform: uppercase;
-            font-size: 0.78rem;
-            letter-spacing: 0.5px;
-            padding: 8px 12px !important;
-            transition: color 0.2s;
-        }
-        .nav-link:hover, .nav-link.active { color: var(--primary-green) !important; }
-        .btn-signin {
-            background: var(--primary-green);
-            color: white !important;
-            border-radius: 25px;
-            padding: 7px 22px !important;
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-        .btn-signin:hover { background: var(--dark-green); }
+    /* ── Section Header ── */
+    .section-header { text-align: center; margin-bottom: 42px; }
+    .section-header h2 { font-size: 1.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
+    .section-header p { color: var(--text-muted); font-size: 0.9rem; }
+    .section-header .green-line {
+        width: 50px; height: 3px; background: var(--primary-green);
+        margin: 10px auto 0; border-radius: 2px;
+    }
 
-        /* ── Hero ── */
-        .hero {
-            background: linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.58)),
-                        url('{{ asset("assests/images/photorealistic-view-off-road-car-with-nature-terrain-weather-conditions (2).jpg") }}') center/cover no-repeat;
-            min-height: 620px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-            padding: 60px 0 40px;
-        }
-        .hero h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-        .hero p { font-size: 1rem; opacity: 0.9; margin-bottom: 22px; }
-        .hero-btn-browse {
-            background: var(--primary-green);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 11px 32px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            margin-right: 10px;
-            transition: 0.3s;
-        }
-        .hero-btn-browse:hover { background: var(--dark-green); color: white; }
-        .hero-btn-find {
-            background: transparent;
-            color: white;
-            border: 2px solid white;
-            border-radius: 30px;
-            padding: 11px 32px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            transition: 0.3s;
-        }
-        .hero-btn-find:hover { background: white; color: var(--text-dark); }
+    /* ── Category Cards ── */
+    .category-section { background: #fff; padding: 60px 0; }
+    .category-card {
+        background: white;
+        border: 1px solid #eee;
+        border-radius: 14px;
+        padding: 22px 15px 18px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        height: 100%;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .category-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 28px rgba(24,194,74,0.15);
+        border-color: var(--primary-green);
+    }
+    .category-card img { height: 75px; object-fit: contain; margin-bottom: 12px; }
+    .category-card h6 {
+        font-weight: 700;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        color: #333;
+        margin: 0;
+        letter-spacing: 0.3px;
+    }
 
-        /* ── Search Box ── */
-        .search-container {
-            width: 96%;
-            max-width: 1140px;
-            margin-top: 32px;
-        }
-        .search-box {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(14px);
-            border: 1px solid rgba(255,255,255,0.25);
-            border-radius: 14px;
-            padding: 24px 28px;
-        }
-        .search-box label {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: white;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 5px;
-        }
-        .search-box .form-control,
-        .search-box .form-select,
-        .search-box .input-group-text {
-            border: none;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            background: white;
-        }
-        .search-box .input-group .form-control { border-radius: 0 8px 8px 0; }
-        .search-box .input-group-text { border-radius: 8px 0 0 8px; border-right: 1px solid #eee; }
-        .btn-show-vehicles {
-            background: var(--primary-green);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            padding: 10px;
-            width: 100%;
-            transition: 0.3s;
-        }
-        .btn-show-vehicles:hover { background: var(--dark-green); }
+    /* ── How It Works ── */
+    .how-it-works { background: var(--light-bg); padding: 65px 0; }
 
-        /* ── Section Header ── */
-        .section-header { text-align: center; margin-bottom: 42px; }
-        .section-header h2 { font-size: 1.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
-        .section-header p { color: var(--text-muted); font-size: 0.9rem; }
-        .section-header .green-line {
-            width: 50px; height: 3px; background: var(--primary-green);
-            margin: 10px auto 0; border-radius: 2px;
-        }
+    /* ── Top Picks ── */
+    .top-picks { background: white; padding: 65px 0; }
+    .vehicle-card {
+        border: 1px solid #eee;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: all 0.3s;
+        height: 100%;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .vehicle-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 14px 30px rgba(0,0,0,0.1);
+    }
+    .vehicle-card img { width: 100%; height: 160px; object-fit: cover; }
+    .vehicle-card-body { padding: 16px; }
+    .vehicle-card-body h6 { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+    .vehicle-card-body .badge-cat {
+        display: inline-block;
+        background: #e8faf0;
+        color: var(--primary-green);
+        font-size: 0.7rem;
+        font-weight: 600;
+        border-radius: 20px;
+        padding: 3px 10px;
+        margin-bottom: 8px;
+    }
+    .vehicle-card-body .price { font-weight: 800; color: var(--primary-green); font-size: 1rem; }
+    .vehicle-card-body .price span { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); }
+    .vehicle-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
+    .vehicle-meta i { color: var(--primary-green); margin-right: 4px; }
+    .stars { color: #f5a623; font-size: 0.75rem; }
 
-        /* ── Category Cards ── */
-        .category-section { background: #fff; padding: 60px 0; }
-        .category-card {
-            background: white;
-            border: 1px solid #eee;
-            border-radius: 14px;
-            padding: 22px 15px 18px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            height: 100%;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-        }
-        .category-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 28px rgba(24,194,74,0.15);
-            border-color: var(--primary-green);
-        }
-        .category-card img { height: 75px; object-fit: contain; margin-bottom: 12px; }
-        .category-card h6 {
-            font-weight: 700;
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            color: #333;
-            margin: 0;
-            letter-spacing: 0.3px;
-        }
+    /* ── Search Results ── */
+    .search-results { background: var(--light-bg); padding: 60px 0; }
+    .result-vehicle-card {
+        background: white;
+        border: 1px solid #eee;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: all 0.3s;
+        height: 100%;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .result-vehicle-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 14px 30px rgba(24,194,74,0.15);
+        border-color: var(--primary-green);
+    }
+    .result-vehicle-card .card-img-top {
+        height: 160px;
+        background: #e8faf0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .result-vehicle-card .card-img-top i {
+        font-size: 3.5rem;
+        color: var(--primary-green);
+        opacity: 0.6;
+    }
+    .result-vehicle-card .card-body { padding: 16px; }
+    .no-results-box {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 14px;
+        border: 1px dashed #ddd;
+    }
 
-        /* ── How It Works ── */
-        .how-it-works { background: var(--light-bg); padding: 65px 0; }
+    /* ── Why Choose ── */
+    .why-choose { background: var(--light-bg); padding: 65px 0; }
+    .feature-card {
+        background: white;
+        border-radius: 14px;
+        padding: 28px 20px;
+        text-align: center;
+        height: 100%;
+        border: 1px solid #eee;
+        transition: all 0.3s;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .feature-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 28px rgba(24,194,74,0.12);
+        border-color: var(--primary-green);
+    }
+    .feature-icon-wrap {
+        width: 68px; height: 68px;
+        background: #e8faf0;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px;
+    }
+    .feature-icon-wrap img { width: 36px; height: 36px; object-fit: contain; }
+    .feature-icon-wrap i { font-size: 1.5rem; color: var(--primary-green); }
+    .feature-card h6 { font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
+    .feature-card p { font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.6; }
 
-        /* ── Top Picks ── */
-        .top-picks { background: white; padding: 65px 0; }
-        .vehicle-card {
-            border: 1px solid #eee;
-            border-radius: 14px;
-            overflow: hidden;
-            transition: all 0.3s;
-            height: 100%;
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-        }
-        .vehicle-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 14px 30px rgba(0,0,0,0.1);
-        }
-        .vehicle-card img { width: 100%; height: 160px; object-fit: cover; }
-        .vehicle-card-body { padding: 16px; }
-        .vehicle-card-body h6 { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
-        .vehicle-card-body .badge-cat {
-            display: inline-block;
-            background: #e8faf0;
-            color: var(--primary-green);
-            font-size: 0.7rem;
-            font-weight: 600;
-            border-radius: 20px;
-            padding: 3px 10px;
-            margin-bottom: 8px;
-        }
-        .vehicle-card-body .price { font-weight: 800; color: var(--primary-green); font-size: 1rem; }
-        .vehicle-card-body .price span { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); }
-        .vehicle-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
-        .vehicle-meta i { color: var(--primary-green); margin-right: 4px; }
-        .stars { color: #f5a623; font-size: 0.75rem; }
+    /* ── Testimonials ── */
+    .testimonials {
+        background: linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.72)),
+                    url('{{ asset("assests/images/couple-bus-sunset.jpg") }}') center/cover no-repeat;
+        padding: 65px 0;
+        color: white;
+    }
+    .testimonials .section-header h2 { color: white; }
+    .testimonials .section-header p { color: rgba(255,255,255,0.75); }
+    .testimonial-card {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 14px;
+        padding: 24px 20px;
+        text-align: center;
+        height: 100%;
+    }
+    .testimonial-card .avatar-placeholder {
+        width: 60px; height: 60px;
+        border-radius: 50%;
+        background: var(--primary-green);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 12px;
+        border: 3px solid rgba(255,255,255,0.4);
+    }
+    .testimonial-card .avatar-placeholder i { font-size: 1.5rem; color: white; }
+    .testimonial-card h6 { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; color: white; }
+    .testimonial-card .t-role { font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-bottom: 12px; }
+    .testimonial-card p { font-size: 0.8rem; color: rgba(255,255,255,0.85); margin-bottom: 10px; line-height: 1.6; }
+    .testimonial-card .stars { color: #f5c518; }
 
-        /* ── Search Results ── */
-        .search-results { background: var(--light-bg); padding: 60px 0; }
-        .result-vehicle-card {
-            background: white;
-            border: 1px solid #eee;
-            border-radius: 14px;
-            overflow: hidden;
-            transition: all 0.3s;
-            height: 100%;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-        }
-        .result-vehicle-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 14px 30px rgba(24,194,74,0.15);
-            border-color: var(--primary-green);
-        }
-        .result-vehicle-card .card-img-top {
-            height: 160px;
-            background: #e8faf0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .result-vehicle-card .card-img-top i {
-            font-size: 3.5rem;
-            color: var(--primary-green);
-            opacity: 0.6;
-        }
-        .result-vehicle-card .card-body { padding: 16px; }
-        .no-results-box {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 14px;
-            border: 1px dashed #ddd;
-        }
+    /* ── Newsletter ── */
+    .newsletter-section { background: white; padding: 60px 0; text-align: center; }
+    .newsletter-section h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+    .newsletter-section p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 28px; }
+    .newsletter-form { max-width: 460px; margin: 0 auto; }
+    .newsletter-form .form-control {
+        border-radius: 30px 0 0 30px;
+        border: 1px solid #ddd;
+        padding: 12px 20px;
+        font-size: 0.88rem;
+    }
+    .newsletter-form .btn-subscribe {
+        background: var(--primary-green);
+        color: white;
+        border-radius: 0 30px 30px 0;
+        border: none;
+        padding: 12px 28px;
+        font-weight: 700;
+        font-size: 0.88rem;
+    }
 
-        /* ── Why Choose ── */
-        .why-choose { background: var(--light-bg); padding: 65px 0; }
-        .feature-card {
-            background: white;
-            border-radius: 14px;
-            padding: 28px 20px;
-            text-align: center;
-            height: 100%;
-            border: 1px solid #eee;
-            transition: all 0.3s;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-        }
-        .feature-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 28px rgba(24,194,74,0.12);
-            border-color: var(--primary-green);
-        }
-        .feature-icon-wrap {
-            width: 68px; height: 68px;
-            background: #e8faf0;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 16px;
-        }
-        .feature-icon-wrap img { width: 36px; height: 36px; object-fit: contain; }
-        .feature-icon-wrap i { font-size: 1.5rem; color: var(--primary-green); }
-        .feature-card h6 { font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
-        .feature-card p { font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.6; }
+    /* ── CTA Banner ── */
+    .cta-banner { background: var(--light-bg); padding: 55px 0; text-align: center; }
+    .cta-banner h2 { font-size: 1.65rem; font-weight: 800; margin-bottom: 8px; }
+    .cta-banner p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 28px; }
+    .btn-cta-signup {
+        background: var(--primary-green);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 34px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin: 0 6px;
+        transition: 0.3s;
+    }
+    .btn-cta-signup:hover { background: var(--dark-green); color: white; }
+    .btn-cta-browse {
+        background: transparent;
+        color: var(--primary-green);
+        border: 2px solid var(--primary-green);
+        border-radius: 30px;
+        padding: 12px 34px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin: 0 6px;
+        transition: 0.3s;
+    }
+    .btn-cta-browse:hover { background: var(--primary-green); color: white; }
+</style>
+@endpush
 
-        /* ── Testimonials ── */
-        .testimonials {
-            background: linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.72)),
-                        url('{{ asset("assests/images/couple-bus-sunset.jpg") }}') center/cover no-repeat;
-            padding: 65px 0;
-            color: white;
-        }
-        .testimonials .section-header h2 { color: white; }
-        .testimonials .section-header p { color: rgba(255,255,255,0.75); }
-        .testimonial-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 14px;
-            padding: 24px 20px;
-            text-align: center;
-            height: 100%;
-        }
-        .testimonial-card .avatar-placeholder {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            background: var(--primary-green);
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 12px;
-            border: 3px solid rgba(255,255,255,0.4);
-        }
-        .testimonial-card .avatar-placeholder i { font-size: 1.5rem; color: white; }
-        .testimonial-card h6 { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; color: white; }
-        .testimonial-card .t-role { font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-bottom: 12px; }
-        .testimonial-card p { font-size: 0.8rem; color: rgba(255,255,255,0.85); margin-bottom: 10px; line-height: 1.6; }
-        .testimonial-card .stars { color: #f5c518; }
-
-        /* ── Newsletter ── */
-        .newsletter-section { background: white; padding: 60px 0; text-align: center; }
-        .newsletter-section h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
-        .newsletter-section p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 28px; }
-        .newsletter-form { max-width: 460px; margin: 0 auto; }
-        .newsletter-form .form-control {
-            border-radius: 30px 0 0 30px;
-            border: 1px solid #ddd;
-            padding: 12px 20px;
-            font-size: 0.88rem;
-        }
-        .newsletter-form .btn-subscribe {
-            background: var(--primary-green);
-            color: white;
-            border-radius: 0 30px 30px 0;
-            border: none;
-            padding: 12px 28px;
-            font-weight: 700;
-            font-size: 0.88rem;
-        }
-
-        /* ── CTA Banner ── */
-        .cta-banner { background: var(--light-bg); padding: 55px 0; text-align: center; }
-        .cta-banner h2 { font-size: 1.65rem; font-weight: 800; margin-bottom: 8px; }
-        .cta-banner p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 28px; }
-        .btn-cta-signup {
-            background: var(--primary-green);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 12px 34px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            margin: 0 6px;
-            transition: 0.3s;
-        }
-        .btn-cta-signup:hover { background: var(--dark-green); color: white; }
-        .btn-cta-browse {
-            background: transparent;
-            color: var(--primary-green);
-            border: 2px solid var(--primary-green);
-            border-radius: 30px;
-            padding: 12px 34px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            margin: 0 6px;
-            transition: 0.3s;
-        }
-        .btn-cta-browse:hover { background: var(--primary-green); color: white; }
-
-        /* ── Footer ── */
-        footer { background: #111827; color: #9ca3af; padding: 55px 0 20px; }
-        footer .brand-text { font-size: 1.5rem; font-weight: 800; color: var(--primary-green); }
-        footer p { font-size: 0.82rem; line-height: 1.7; margin-top: 12px; }
-        footer h6 { color: white; font-weight: 700; font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 18px; }
-        footer ul { list-style: none; padding: 0; margin: 0; }
-        footer ul li { margin-bottom: 10px; }
-        footer ul li a { color: #9ca3af; text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
-        footer ul li a:hover { color: var(--primary-green); }
-        footer .contact-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 0.82rem; }
-        footer .contact-item i { color: var(--primary-green); margin-top: 2px; min-width: 14px; }
-        .social-icons a {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            background: #1f2937;
-            color: #9ca3af;
-            font-size: 0.9rem;
-            margin-right: 8px;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-        .social-icons a:hover { background: var(--primary-green); color: white; }
-        .footer-divider { border-color: #374151; margin: 40px 0 20px; }
-        .footer-copy { font-size: 0.78rem; text-align: center; color: #6b7280; }
-    </style>
-</head>
-<body>
-
-<!-- Top Bar -->
-<div class="top-bar">WELCOME TO VROAM - VEHICLE RENTAL ON ANY MODE</div>
-
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg sticky-top bg-white shadow-sm">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-            <img src="{{ asset('assests/images/Logo1.png') }}" alt="VROAM Logo">
-            <span>VROAM</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Vehicles</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Categories</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">About Us</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Contact Us</a></li>
-            </ul>
-            <div class="d-flex align-items-center gap-3">
-                <a href="#" class="text-dark" title="Booking History">
-                    <i class="fa-solid fa-clock-rotate-left fs-5"></i>
-                </a>
-                <a href="#" class="text-dark position-relative" title="Messages">
-                    <i class="fa-solid fa-envelope fs-5"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">2</span>
-                </a>
-                <div class="dropdown">
-                    <a href="#" class="d-flex align-items-center gap-2 text-decoration-none dropdown-toggle text-dark" id="profileDropdown" data-bs-toggle="dropdown">
-                        <div class="text-end d-none d-sm-block">
-                            <div class="fw-bold" style="font-size: 0.82rem; line-height: 1.2;">Alex Perera</div>
-                            <small class="text-muted" style="font-size: 0.7rem;">Verified User</small>
-                        </div>
-                        <img src="https://ui-avatars.com/api/?name=Alex+Perera&background=18c24a&color=fff" class="rounded-circle border" style="width: 38px; height: 38px;">
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                        <li><a class="dropdown-item py-2" href="#"><i class="fa-solid fa-user me-2 text-success"></i> My Profile</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item py-2 text-danger" href="#"><i class="fa-solid fa-power-off me-2"></i> Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
+@section('content')
 
 <!-- Hero Section -->
 <section class="hero">
@@ -533,7 +402,6 @@
                 @foreach($vehicles as $vehicle)
                 <div class="col-md-3 col-sm-6">
                     <div class="result-vehicle-card">
-                        {{-- Vehicle icon placeholder (replace with real image once you add image column) --}}
                         <div class="card-img-top">
                             @php
                                 $iconMap = [
@@ -552,7 +420,9 @@
                             <i class="fa-solid {{ $icon }}"></i>
                         </div>
                         <div class="card-body">
-                            <span class="badge-cat">{{ $vehicle->vehicle_category }}</span>
+                            <span class="badge-cat" style="display:inline-block; background:#e8faf0; color:var(--primary-green); font-size:0.7rem; font-weight:600; border-radius:20px; padding:3px 10px; margin-bottom:8px;">
+                                {{ $vehicle->vehicle_category }}
+                            </span>
                             <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">
                                 {{ $vehicle->brand }} {{ $vehicle->model }}
                             </h6>
@@ -759,16 +629,16 @@
         <div class="row g-4">
             @php
                 $features = [
-                    ['img'=>'Untitled design (11).png', 'icon'=>'fa-cars',               'title'=>'Wide Range of Vehicles',          'desc'=>'From economy cars to luxury SUVs, bikes, trucks and specialty equipment.'],
-                    ['img'=>'Untitled design (12).png', 'icon'=>'fa-tags',               'title'=>'Affordable & Transparent Pricing', 'desc'=>'No hidden fees. Clear pricing that matches the quality of service you receive.'],
-                    ['img'=>'Untitled design (13).png', 'icon'=>'fa-bolt',               'title'=>'Easy & Fast Booking Process',     'desc'=>'Book your vehicle in minutes with our simple step-by-step process.'],
-                    ['img'=>'Untitled design (14).png', 'icon'=>'fa-shield-halved',      'title'=>'Trusted & Verified Owners',       'desc'=>'Every vehicle owner is verified. You rent with complete confidence.'],
-                    ['img'=>'Untitled design (15).png', 'icon'=>'fa-location-crosshairs','title'=>'Location Based Search',           'desc'=>'Find available vehicles near you with our smart location-based filters.'],
-                    ['img'=>'Untitled design (16).png', 'icon'=>'fa-sliders',            'title'=>'Flexible Rental Options',         'desc'=>'Hourly, daily, weekly or monthly — rental plans tailored to your needs.'],
-                    ['img'=>'Untitled design (17).png', 'icon'=>'fa-award',              'title'=>'Ratings & Reviews',               'desc'=>'Read honest reviews from real renters to make confident decisions.'],
-                    ['img'=>'Untitled design (18).png', 'icon'=>'fa-car-side',           'title'=>'Well Maintained Vehicles',        'desc'=>'All listed vehicles are regularly serviced and inspected for safety.'],
-                    ['img'=>'Untitled design (19).png', 'icon'=>'fa-headset',            'title'=>'24/7 Customer Support',           'desc'=>'Round-the-clock assistance via chat, call or email whenever you need.'],
-                    ['img'=>'Untitled design (20).png', 'icon'=>'fa-mobile-screen',      'title'=>'All in One Platform',             'desc'=>'Manage bookings, payments, and profiles seamlessly in one place.'],
+                    ['img'=>'Untitled design (11).png', 'icon'=>'fa-cars',               'title'=>'Wide Range of Vehicles',           'desc'=>'From economy cars to luxury SUVs, bikes, trucks and specialty equipment.'],
+                    ['img'=>'Untitled design (12).png', 'icon'=>'fa-tags',               'title'=>'Affordable & Transparent Pricing',  'desc'=>'No hidden fees. Clear pricing that matches the quality of service you receive.'],
+                    ['img'=>'Untitled design (13).png', 'icon'=>'fa-bolt',               'title'=>'Easy & Fast Booking Process',      'desc'=>'Book your vehicle in minutes with our simple step-by-step process.'],
+                    ['img'=>'Untitled design (14).png', 'icon'=>'fa-shield-halved',      'title'=>'Trusted & Verified Owners',        'desc'=>'Every vehicle owner is verified. You rent with complete confidence.'],
+                    ['img'=>'Untitled design (15).png', 'icon'=>'fa-location-crosshairs','title'=>'Location Based Search',            'desc'=>'Find available vehicles near you with our smart location-based filters.'],
+                    ['img'=>'Untitled design (16).png', 'icon'=>'fa-sliders',            'title'=>'Flexible Rental Options',          'desc'=>'Hourly, daily, weekly or monthly — rental plans tailored to your needs.'],
+                    ['img'=>'Untitled design (17).png', 'icon'=>'fa-award',              'title'=>'Ratings & Reviews',                'desc'=>'Read honest reviews from real renters to make confident decisions.'],
+                    ['img'=>'Untitled design (18).png', 'icon'=>'fa-car-side',           'title'=>'Well Maintained Vehicles',         'desc'=>'All listed vehicles are regularly serviced and inspected for safety.'],
+                    ['img'=>'Untitled design (19).png', 'icon'=>'fa-headset',            'title'=>'24/7 Customer Support',            'desc'=>'Round-the-clock assistance via chat, call or email whenever you need.'],
+                    ['img'=>'Untitled design (20).png', 'icon'=>'fa-mobile-screen',      'title'=>'All in One Platform',              'desc'=>'Manage bookings, payments, and profiles seamlessly in one place.'],
                 ];
             @endphp
             @foreach($features as $f)
@@ -852,78 +722,9 @@
     </div>
 </section>
 
-<!-- Footer -->
-<footer>
-    <div class="container">
-        <div class="row g-5">
-            <div class="col-md-3">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <img src="{{ asset('assests/images/Logo1.png') }}" alt="VROAM" style="width:40px; height:40px; object-fit:contain;">
-                    <span class="brand-text">VROAM</span>
-                </div>
-                <p>We provide a complete vehicle rental experience — bikes, cars, vans, trucks, heavy machinery, and specialty equipment — all on one trusted platform.</p>
-                <div class="contact-item mt-3">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <span>Colombo, Sri Lanka</span>
-                </div>
-                <div class="contact-item">
-                    <i class="fa-solid fa-phone"></i>
-                    <span>+94 (11) 234 5678</span>
-                </div>
-                <div class="contact-item">
-                    <i class="fa-solid fa-envelope"></i>
-                    <span>info@vroam.lk</span>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <h6>Quick Links</h6>
-                <ul>
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#">Lease Vehicles</a></li>
-                    <li><a href="#">Blog</a></li>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Contact</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3">
-                <h6>Vehicle Categories</h6>
-                <ul>
-                    <li><a href="#">Bicycles</a></li>
-                    <li><a href="#">Motorcycles</a></li>
-                    <li><a href="#">Cars</a></li>
-                    <li><a href="#">SUVs</a></li>
-                    <li><a href="#">Vans</a></li>
-                    <li><a href="#">Agricultural Vehicles</a></li>
-                    <li><a href="#">Construction Vehicles</a></li>
-                    <li><a href="#">Camper Vehicles</a></li>
-                </ul>
-            </div>
-            <div class="col-md-4">
-                <h6>Customer Support</h6>
-                <ul class="mb-4">
-                    <li><a href="#">Help Centre</a></li>
-                    <li><a href="#">FAQs</a></li>
-                    <li><a href="#">How to Book / Return</a></li>
-                    <li><a href="#">Cancellation Policy</a></li>
-                    <li><a href="#">Terms & Conditions</a></li>
-                </ul>
-                <h6>Social Media</h6>
-                <div class="social-icons">
-                    <a href="#" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" title="Twitter / X"><i class="fa-brands fa-x-twitter"></i></a>
-                    <a href="#" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
-                    <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-                </div>
-            </div>
-        </div>
-        <hr class="footer-divider">
-        <p class="footer-copy">© 2026 VROAM Platform. All Rights Reserved. | Designed &amp; Built for Sri Lanka's Vehicle Rental Market.</p>
-    </div>
-</footer>
+@endsection
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+@push('scripts')
 {{-- Auto-scroll to results after search --}}
 @if($searched)
 <script>
@@ -935,6 +736,4 @@
     });
 </script>
 @endif
-
-</body>
-</html>
+@endpush
