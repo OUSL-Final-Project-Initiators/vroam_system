@@ -16,10 +16,15 @@ class UserhomepageController extends Controller
 
             $query = Vehicle::where('status', 'available');
 
+            // Vehicle type filter
             if ($request->filled('vehicle_type') && $request->vehicle_type !== 'Select Category') {
                 $query->where('vehicle_category', 'like', '%' . $request->vehicle_type . '%');
             }
 
+            // Location filter — smart two-level handling
+            // When the user picks "All of Galle" from the dropdown, the hidden input
+            // sends "Galle" (stripped). When they pick a specific town like "Hikkaduwa",
+            // it sends "Hikkaduwa". An empty value (All of Sri Lanka) skips filtering.
             if ($request->filled('location')) {
                 $query->where('location', 'like', '%' . $request->location . '%');
             }

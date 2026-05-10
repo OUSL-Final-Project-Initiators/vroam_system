@@ -11,6 +11,7 @@ class VehicleSeeder extends Seeder
     {
         $vehicles = [
             ['vehicle_category' => 'Car',                    'location' => 'Colombo',     'brand' => 'Toyota',   'model' => 'Aqua',       'status' => 'available'],
+            ['vehicle_category' => 'Car',                    'location' => 'Galle',       'brand' => 'Honda',   'model' => 'Prius',       'status' => 'available'],
             ['vehicle_category' => 'Car',                    'location' => 'Kandy',       'brand' => 'Honda',    'model' => 'Vezel',      'status' => 'rented'],
             ['vehicle_category' => 'SUV',                    'location' => 'Galle',       'brand' => 'Nissan',   'model' => 'X-Trail',    'status' => 'available'],
             ['vehicle_category' => 'SUV',                    'location' => 'Negombo',     'brand' => 'Mitsubishi','model' => 'Outlander', 'status' => 'maintenance'],

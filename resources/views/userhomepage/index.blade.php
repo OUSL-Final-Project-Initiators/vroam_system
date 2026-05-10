@@ -90,6 +90,79 @@
     }
     .btn-show-vehicles:hover { background: var(--dark-green); }
 
+    /* ── Location Dropdown ── */
+    .loc-trigger {
+        cursor: pointer;
+        user-select: none;
+    }
+    .loc-trigger .form-control {
+        cursor: pointer;
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .loc-panel {
+        display: none;
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+        z-index: 9999;
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+    .loc-panel::-webkit-scrollbar { width: 4px; }
+    .loc-panel::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+    .loc-panel.open { display: block; }
+    .loc-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 14px;
+        cursor: pointer;
+        font-size: 0.84rem;
+        color: #333;
+        border-bottom: 1px solid #f5f5f5;
+        transition: background 0.12s;
+    }
+    .loc-item:last-child { border-bottom: none; }
+    .loc-item:hover { background: #f0faf5; }
+    .loc-item.all-opt {
+        font-weight: 700;
+        background: #f8fffe;
+        border-bottom: 1px solid #e0f5ec;
+        color: var(--primary-green, #18c24a);
+    }
+    .loc-item.all-opt:hover { background: #e8faf0; }
+    .loc-item.back-opt {
+        color: #888;
+        font-size: 0.8rem;
+        border-bottom: 1px solid #eee;
+        background: #fafafa;
+    }
+    .loc-item.back-opt:hover { background: #f0f0f0; }
+    .loc-section-lbl {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #aaa;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 8px 14px 4px;
+        background: #fff;
+    }
+    .loc-chevron-right {
+        margin-left: auto;
+        font-size: 0.65rem;
+        color: #bbb;
+    }
+    .loc-caret { font-size: 0.7rem; transition: transform 0.2s; }
+    .loc-caret.open { transform: rotate(180deg); }
+
     /* ── Section Header ── */
     .section-header { text-align: center; margin-bottom: 42px; }
     .section-header h2 { font-size: 1.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
@@ -328,11 +401,13 @@
 
         <!-- Search Box -->
         <div class="search-container">
-            <form action="{{ route('user.index') }}" method="GET">
+            <form action="{{ route('user.index') }}" method="GET" id="searchForm">
                 <div class="search-box">
                     <div class="row g-3 align-items-end">
+
+                        {{-- Vehicle Type --}}
                         <div class="col-md-2">
-                            <label><i class="fa-solid fa-list me-1"></i> Vehicle Type</label>
+                            <label><i class="fa-solid fa-list me-1"></i> Vehicle Category</label>
                             <select class="form-select form-select-sm" name="vehicle_type">
                                 <option value="">Select Category</option>
                                 <option value="Bicycle"              {{ request('vehicle_type') == 'Bicycle'              ? 'selected' : '' }}>Bicycles</option>
@@ -346,29 +421,52 @@
                                 <option value="Camper Vehicle"       {{ request('vehicle_type') == 'Camper Vehicle'       ? 'selected' : '' }}>Camper Vehicles</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label><i class="fa-solid fa-location-dot me-1"></i> Pick-up Location</label>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="fa-solid fa-map-pin text-muted"></i></span>
-                                <input type="text" class="form-control" name="location"
-                                       placeholder="City or address" value="{{ request('location') }}">
+
+                        {{-- Pick-up Location (two-level dropdown) --}}
+                        <div class="col-md-3" style="position: relative;">
+                            <label><i class="fa-solid fa-location-dot me-1"></i> Location</label>
+
+                            {{-- Visible trigger button --}}
+                            <div class="input-group input-group-sm loc-trigger" id="locTrigger">
+                                <span class="input-group-text">
+                                    <i class="fa-solid fa-map-pin text-muted"></i>
+                                </span>
+                                <span class="form-control" id="locDisplay" style="color:#6c757d; cursor:pointer;">
+                                    <span id="locLabel">Select location…</span>
+                                    <i class="fa-solid fa-chevron-down loc-caret ms-auto" id="locCaret"></i>
+                                </span>
+                            </div>
+
+                            {{-- Hidden input submitted with form --}}
+                            <input type="hidden" name="location" id="locationValue" value="{{ request('location') }}">
+
+                            {{-- Dropdown panel --}}
+                            <div class="loc-panel" id="locPanel">
+                                <div id="locPanelInner"></div>
                             </div>
                         </div>
+
+                        {{-- Pick-up Date & Time --}}
                         <div class="col-md-2">
-                            <label><i class="fa-solid fa-calendar me-1"></i> Pick-up Date & Time</label>
+                            <label><i class="fa-solid fa-calendar me-1"></i> Pick Date & Time</label>
                             <input type="datetime-local" class="form-control form-control-sm"
                                    name="pickup_date" value="{{ request('pickup_date') }}">
                         </div>
+
+                        {{-- Drop-off Date & Time --}}
                         <div class="col-md-2">
-                            <label><i class="fa-solid fa-calendar-check me-1"></i> Drop-off Date & Time</label>
+                            <label><i class="fa-solid fa-calendar-check me-1"></i> Drop Date & Time</label>
                             <input type="datetime-local" class="form-control form-control-sm"
                                    name="dropoff_date" value="{{ request('dropoff_date') }}">
                         </div>
+
+                        {{-- Submit --}}
                         <div class="col-md-3 d-flex align-items-end">
                             <button type="submit" class="btn-show-vehicles fw-bold py-2">
                                 <i class="fa-solid fa-magnifying-glass me-2"></i>Show Vehicles
                             </button>
                         </div>
+
                     </div>
                 </div>
             </form>
@@ -725,14 +823,167 @@
 @endsection
 
 @push('scripts')
+<script>
+(function () {
+    /* ─────────────────────────────────────────────
+       Sri Lanka Districts → Towns data
+    ───────────────────────────────────────────── */
+    var SL = {
+        'Colombo':      { label: 'Colombo District',      towns: ['All of Colombo','Colombo City','Dehiwala','Moratuwa','Sri Jayawardenepura Kotte','Kolonnawa','Maharagama','Nugegoda','Ratmalana','Homagama','Kaduwela','Kesbewa','Avissawella','Hanwella'] },
+        'Gampaha':      { label: 'Gampaha District',      towns: ['All of Gampaha','Gampaha City','Negombo','Ja-Ela','Wattala','Ragama','Kelaniya','Minuwangoda','Katunayake','Divulapitiya','Mirigama','Veyangoda','Nittambuwa'] },
+        'Kalutara':     { label: 'Kalutara District',     towns: ['All of Kalutara','Kalutara City','Beruwala','Aluthgama','Matugama','Bandaragama','Horana','Panadura','Ingiriya','Bulathsinhala'] },
+        'Kandy':        { label: 'Kandy District',        towns: ['All of Kandy','Kandy City','Peradeniya','Katugastota','Gampola','Nawalapitiya','Wattegama','Kundasale','Teldeniya','Akurana','Hatton'] },
+        'Matale':       { label: 'Matale District',       towns: ['All of Matale','Matale City','Dambulla','Sigiriya','Rattota','Ukuwela','Galewela','Pallepola'] },
+        'NuwaraEliya':  { label: 'Nuwara Eliya District', towns: ['All of Nuwara Eliya','Nuwara Eliya City','Hatton','Talawakele','Ginigathena','Maskeliya','Ragala'] },
+        'Galle':        { label: 'Galle District',        towns: ['All of Galle','Galle City','Ambalangoda','Elpitiya','Hikkaduwa','Baddegama','Karandeniya','Bentota','Balapitiya','Ahangama','Unawatuna','Weligama'] },
+        'Matara':       { label: 'Matara District',       towns: ['All of Matara','Matara City','Weligama','Mirissa','Akuressa','Hakmana','Deniyaya','Kamburupitiya','Dikwella'] },
+        'Hambantota':   { label: 'Hambantota District',   towns: ['All of Hambantota','Hambantota City','Tangalle','Tissamaharama','Beliatta','Sooriyawewa','Weeraketiya','Ambalantota'] },
+        'Jaffna':       { label: 'Jaffna District',       towns: ['All of Jaffna','Jaffna City','Chavakachcheri','Point Pedro','Nallur','Tellippalai','Kopay'] },
+        'Kilinochchi':  { label: 'Kilinochchi District',  towns: ['All of Kilinochchi','Kilinochchi City','Paranthan','Kandavalai'] },
+        'Mannar':       { label: 'Mannar District',       towns: ['All of Mannar','Mannar City','Murunkan','Nanattan'] },
+        'Vavuniya':     { label: 'Vavuniya District',     towns: ['All of Vavuniya','Vavuniya City','Cheddikulam','Nedunkeni'] },
+        'Mullaitivu':   { label: 'Mullaitivu District',   towns: ['All of Mullaitivu','Mullaitivu City','Oddusuddan','Puthukudiyiruppu'] },
+        'Batticaloa':   { label: 'Batticaloa District',   towns: ['All of Batticaloa','Batticaloa City','Kattankudy','Eravur','Valaichchenai','Kalmunai'] },
+        'Ampara':       { label: 'Ampara District',       towns: ['All of Ampara','Ampara City','Kalmunai','Sainthamaruthu','Akkarepattu','Dehiattakandiya','Uhana','Mahaoya'] },
+        'Trincomalee':  { label: 'Trincomalee District',  towns: ['All of Trincomalee','Trincomalee City','Kinniya','Muttur','Kantale','Seruvila'] },
+        'Kurunegala':   { label: 'Kurunegala District',   towns: ['All of Kurunegala','Kurunegala City','Kuliyapitiya','Mawathagama','Nikaweratiya','Pannala','Wariyapola','Polgahawela','Giriulla'] },
+        'Puttalam':     { label: 'Puttalam District',     towns: ['All of Puttalam','Puttalam City','Chilaw','Wennappuwa','Anamaduwa','Nattandiya','Dankotuwa'] },
+        'Anuradhapura': { label: 'Anuradhapura District', towns: ['All of Anuradhapura','Anuradhapura City','Medawachchiya','Nochchiyagama','Mihintale','Kekirawa','Tambuttegama','Galnewa','Eppawala'] },
+        'Polonnaruwa':  { label: 'Polonnaruwa District',  towns: ['All of Polonnaruwa','Polonnaruwa City','Hingurakgoda','Medirigiriya','Manampitiya','Lankapura'] },
+        'Badulla':      { label: 'Badulla District',      towns: ['All of Badulla','Badulla City','Bandarawela','Haputale','Welimada','Mahiyanganaya','Passara','Ella','Hali-Ela'] },
+        'Moneragala':   { label: 'Moneragala District',   towns: ['All of Moneragala','Moneragala City','Wellawaya','Buttala','Bibile','Medagama','Siyambalanduwa'] },
+        'Ratnapura':    { label: 'Ratnapura District',    towns: ['All of Ratnapura','Ratnapura City','Balangoda','Embilipitiya','Kuruwita','Eheliyagoda','Pelmadulla','Ayagama'] },
+        'Kegalle':      { label: 'Kegalle District',      towns: ['All of Kegalle','Kegalle City','Mawanella','Warakapola','Rambukkana','Ruwanwella','Dehiovita','Aranayake','Yatiyanthota'] },
+    };
+
+    /* ── Element refs ── */
+    var trigger   = document.getElementById('locTrigger');
+    var panel     = document.getElementById('locPanel');
+    var inner     = document.getElementById('locPanelInner');
+    var labelEl   = document.getElementById('locLabel');
+    var caret     = document.getElementById('locCaret');
+    var hidden    = document.getElementById('locationValue');
+    var isOpen    = false;
+
+    /* ── Restore display label on page reload after search ── */
+    var existing = hidden.value;
+    if (existing) {
+        labelEl.textContent = existing;
+        labelEl.style.color = '#212529';
+    }
+
+    /* ── Open / Close ── */
+    function openPanel() {
+        isOpen = true;
+        panel.classList.add('open');
+        caret.classList.add('open');
+        renderDistricts();
+    }
+    function closePanel() {
+        isOpen = false;
+        panel.classList.remove('open');
+        caret.classList.remove('open');
+    }
+
+    trigger.addEventListener('click', function () {
+        isOpen ? closePanel() : openPanel();
+    });
+
+    /* Close when clicking outside */
+    document.addEventListener('click', function (e) {
+        var wrap = document.getElementById('locTrigger').closest('.col-md-3');
+        if (wrap && !wrap.contains(e.target)) closePanel();
+    });
+
+    /* ── Select a value ── */
+    function selectValue(displayText, inputVal) {
+        labelEl.textContent = displayText;
+        labelEl.style.color = '#212529';
+        hidden.value = inputVal;
+        closePanel();
+    }
+
+    /* ── Build a single row element ── */
+    function makeItem(html, classes, onClick) {
+        var el = document.createElement('div');
+        el.className = 'loc-item ' + (classes || '');
+        el.innerHTML = html;
+        el.addEventListener('click', function (e) { e.stopPropagation(); onClick(); });
+        return el;
+    }
+
+    /* ── Level 1: Districts ── */
+    function renderDistricts() {
+        inner.innerHTML = '';
+
+        /* "All of Sri Lanka" */
+        inner.appendChild(makeItem(
+            '<i class="fa-solid fa-globe fa-fw"></i> All of Sri Lanka',
+            'all-opt',
+            function () { selectValue('All of Sri Lanka', ''); }
+        ));
+
+        /* Section label */
+        var lbl = document.createElement('div');
+        lbl.className = 'loc-section-lbl';
+        lbl.textContent = 'Select District';
+        inner.appendChild(lbl);
+
+        /* Each district */
+        Object.keys(SL).forEach(function (key) {
+            inner.appendChild(makeItem(
+                '<i class="fa-solid fa-map fa-fw"></i> ' + SL[key].label +
+                '<i class="fa-solid fa-chevron-right fa-fw loc-chevron-right"></i>',
+                '',
+                function () { renderTowns(key); }
+            ));
+        });
+    }
+
+    /* ── Level 2: Towns ── */
+    function renderTowns(key) {
+        var district = SL[key];
+        inner.innerHTML = '';
+
+        /* Back button */
+        inner.appendChild(makeItem(
+            '<i class="fa-solid fa-arrow-left fa-fw"></i> Back to districts',
+            'back-opt',
+            renderDistricts
+        ));
+
+        /* Section label */
+        var lbl = document.createElement('div');
+        lbl.className = 'loc-section-lbl';
+        lbl.textContent = district.label;
+        inner.appendChild(lbl);
+
+        /* Each town */
+        district.towns.forEach(function (town, idx) {
+            var isAll = idx === 0;
+            // "All of Galle"  → strips "All of "  → sends "Galle"   (matches all in district)
+            // "Colombo City"  → strips " City"    → sends "Colombo" (matches DB value)
+            // "Hikkaduwa"     → no change         → sends "Hikkaduwa"
+            var submitVal = isAll
+                ? town.replace('All of ', '')
+                : town.replace(' City', '');
+
+            inner.appendChild(makeItem(
+                '<i class="fa-solid ' + (isAll ? 'fa-map' : 'fa-map-pin') + ' fa-fw"></i> ' + town,
+                isAll ? 'all-opt' : '',
+                function () { selectValue(town, submitVal); }
+            ));
+        });
+    }
+})();
+</script>
+
 {{-- Auto-scroll to results after search --}}
 @if($searched)
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const results = document.getElementById('search-results');
-        if (results) {
-            results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        var results = document.getElementById('search-results');
+        if (results) results.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 </script>
 @endif
