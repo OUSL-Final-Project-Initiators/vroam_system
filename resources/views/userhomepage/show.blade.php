@@ -244,6 +244,26 @@
     </div>
 </section>
 
+<!-- Flash Messages -->
+@if(session('success'))
+<div class="container mt-4">
+    <div class="alert d-flex align-items-center gap-3 rounded-3"
+         style="background:#e8faf0; border:1px solid #b6eacc; color:#0d7a35; font-size:0.85rem; font-weight:600;">
+        <i class="fa-solid fa-circle-check fa-lg"></i>
+        {{ session('success') }}
+    </div>
+</div>
+@endif
+@if(session('error'))
+<div class="container mt-4">
+    <div class="alert d-flex align-items-center gap-3 rounded-3"
+         style="background:#fdecea; border:1px solid #f5c0bb; color:#c0392b; font-size:0.85rem; font-weight:600;">
+        <i class="fa-solid fa-circle-exclamation fa-lg"></i>
+        {{ session('error') }}
+    </div>
+</div>
+@endif
+
 <!-- Detail Content -->
 <section class="detail-section">
     <div class="container">
@@ -415,9 +435,9 @@
                     </p>
 
                     @if($vehicle->status === 'available')
-                        <button class="btn-book-now">
+                        <a href="{{ route('user.booking.form', $vehicle->id) }}" class="btn-book-now" style="text-decoration:none;">
                             <i class="fa-solid fa-calendar-check"></i> Book Now
-                        </button>
+                        </a>
                         <button class="btn-contact">
                             <i class="fa-solid fa-phone me-1"></i> Contact Owner
                         </button>

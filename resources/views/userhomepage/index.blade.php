@@ -673,50 +673,69 @@
             <p>Discover our most popular vehicles trusted and loved by our customers</p>
             <div class="green-line"></div>
         </div>
+        @php
+            $topIconMap = [
+                'Car'                  => 'fa-car',
+                'SUV'                  => 'fa-truck-pickup',
+                'Van'                  => 'fa-van-shuttle',
+                'Truck'                => 'fa-truck',
+                'Motorcycle'           => 'fa-motorcycle',
+                'Bicycle'              => 'fa-bicycle',
+                'Agricultural Vehicle' => 'fa-tractor',
+                'Construction Vehicle' => 'fa-helmet-safety',
+                'Camper Vehicle'       => 'fa-caravan',
+                'Special Vehicle'      => 'fa-star',
+            ];
+        @endphp
+        @if($topVehicles->isEmpty())
+            <p class="text-center text-muted" style="font-size:0.88rem;">No bookings yet — top picks will appear here once vehicles are booked.</p>
+        @else
         <div class="row g-4">
-            @php
-                $topVehicles = [
-                    ['name'=>'Toyota Axio',          'cat'=>'Car',        'img'=>'Toyota Axio.png',  'price'=>'3,500', 'location'=>'Colombo', 'rating'=>4.8, 'reviews'=>124, 'seats'=>5, 'fuel'=>'Petrol'],
-                    ['name'=>'Toyota Prado TX',      'cat'=>'SUV',        'img'=>'Prado TX.png',     'price'=>'8,500', 'location'=>'Kandy',   'rating'=>4.9, 'reviews'=>98,  'seats'=>7, 'fuel'=>'Diesel'],
-                    ['name'=>'Suzuki Wagon R Euro 2','cat'=>'Car',        'img'=>'Untitled design (26).png', 'price'=>'2,800', 'location'=>'Galle', 'rating'=>4.6, 'reviews'=>76, 'seats'=>5, 'fuel'=>'Petrol'],
-                    ['name'=>'Yamaha R15',           'cat'=>'Motorcycle', 'img'=>'Yamaha R15.png',   'price'=>'1,200', 'location'=>'Negombo', 'rating'=>4.7, 'reviews'=>54,  'seats'=>2, 'fuel'=>'Petrol'],
-                ];
-            @endphp
             @foreach($topVehicles as $v)
             <div class="col-md-3 col-sm-6">
-                <div class="vehicle-card">
-                    <img src="{{ asset('assests/images/' . $v['img']) }}" alt="{{ $v['name'] }}"
-                         style="width:100%; height:160px; object-fit:contain; background:#f8f9fa; padding:10px;"
-                         onerror="this.style.objectFit='cover'; this.src='https://via.placeholder.com/400x160?text={{ urlencode($v['name']) }}'">
-                    <div class="vehicle-card-body">
-                        <span class="badge-cat">{{ $v['cat'] }}</span>
-                        <h6>{{ $v['name'] }}</h6>
-                        <div class="vehicle-meta">
-                            <i class="fa-solid fa-location-dot"></i>{{ $v['location'] }} &nbsp;
-                            <i class="fa-solid fa-gas-pump"></i>{{ $v['fuel'] }} &nbsp;
-                            <i class="fa-solid fa-user-group"></i>{{ $v['seats'] }} Seats
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between pt-2 border-top mt-2">
-                            <div>
-                                <div class="price">LKR {{ $v['price'] }} <span>/ day</span></div>
-                                <div class="stars mt-1">
-                                    @for($i=1;$i<=5;$i++)
-                                        @if($i <= floor($v['rating']))
-                                            <i class="fa-solid fa-star"></i>
-                                        @else
-                                            <i class="fa-regular fa-star"></i>
-                                        @endif
-                                    @endfor
-                                    <small class="text-muted ms-1">{{ $v['rating'] }} ({{ $v['reviews'] }})</small>
-                                </div>
+                <a href="{{ route('user.show', $v->id) }}" style="text-decoration:none; color:inherit;">
+                    <div class="vehicle-card" style="cursor:pointer; transition: transform 0.25s, box-shadow 0.25s;"
+                         onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 16px 32px rgba(24,194,74,0.15)';"
+                         onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                        {{-- Icon placeholder (no images in DB) --}}
+                        <div style="height:160px; background:#f0faf4; display:flex; align-items:center; justify-content:center;">
+                            <div style="width:90px; height:90px; background:#e8faf0; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                <i class="fa-solid {{ $topIconMap[$v->vehicle_category] ?? 'fa-car' }}"
+                                   style="font-size:2.4rem; color:var(--primary-green); opacity:0.8;"></i>
                             </div>
-                            <button class="btn btn-sm" style="background:#e8faf0; color:var(--primary-green); font-weight:700; border-radius:20px; padding:6px 14px; font-size:0.75rem;">Book</button>
+                        </div>
+                        <div class="vehicle-card-body">
+                            <span class="badge-cat">{{ $v->vehicle_category }}</span>
+                            <h6>{{ $v->brand }} {{ $v->model }}</h6>
+                            <div class="vehicle-meta">
+                                <i class="fa-solid fa-location-dot"></i>{{ $v->location }}
+                            </div>
+                            <div class="vehicle-meta mt-1">
+                                @if($v->status === 'available')
+                                    <i class="fa-solid fa-circle-check" style="color:var(--primary-green);"></i>
+                                    <span style="color:var(--primary-green); font-weight:600;">Available</span>
+                                @else
+                                    <i class="fa-solid fa-clock" style="color:#e65c00;"></i>
+                                    <span style="color:#e65c00; font-weight:600;">{{ ucfirst($v->status) }}</span>
+                                @endif
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between pt-2 border-top mt-2">
+                                <div>
+                                    <div style="font-size:0.75rem; color:var(--primary-green); font-weight:700;">
+                                        <i class="fa-solid fa-fire me-1"></i>{{ $v->bookings_count }} {{ Str::plural('booking', $v->bookings_count) }}
+                                    </div>
+                                </div>
+                                <span class="btn btn-sm" style="background:#e8faf0; color:var(--primary-green); font-weight:700; border-radius:20px; padding:6px 14px; font-size:0.75rem;">
+                                    View
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             @endforeach
         </div>
+        @endif
     </div>
 </section>
 
