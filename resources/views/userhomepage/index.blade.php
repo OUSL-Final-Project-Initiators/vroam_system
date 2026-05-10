@@ -499,53 +499,57 @@
             <div class="row g-4">
                 @foreach($vehicles as $vehicle)
                 <div class="col-md-3 col-sm-6">
-                    <div class="result-vehicle-card">
-                        <div class="card-img-top">
-                            @php
-                                $iconMap = [
-                                    'Car'                  => 'fa-car',
-                                    'SUV'                  => 'fa-truck-pickup',
-                                    'Van'                  => 'fa-van-shuttle',
-                                    'Truck'                => 'fa-truck',
-                                    'Motorcycle'           => 'fa-motorcycle',
-                                    'Bicycle'              => 'fa-bicycle',
-                                    'Agricultural Vehicle' => 'fa-tractor',
-                                    'Construction Vehicle' => 'fa-helmet-safety',
-                                    'Camper Vehicle'       => 'fa-caravan',
-                                ];
-                                $icon = $iconMap[$vehicle->vehicle_category] ?? 'fa-car';
-                            @endphp
-                            <i class="fa-solid {{ $icon }}"></i>
-                        </div>
-                        <div class="card-body">
-                            <span class="badge-cat" style="display:inline-block; background:#e8faf0; color:var(--primary-green); font-size:0.7rem; font-weight:600; border-radius:20px; padding:3px 10px; margin-bottom:8px;">
-                                {{ $vehicle->vehicle_category }}
-                            </span>
-                            <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">
-                                {{ $vehicle->brand }} {{ $vehicle->model }}
-                            </h6>
-                            <div class="vehicle-meta">
-                                <i class="fa-solid fa-location-dot"></i> {{ $vehicle->location }}
+                    <a href="{{ route('user.show', $vehicle->id) }}" style="text-decoration:none; color:inherit; display:block; height:100%;">
+                        <div class="result-vehicle-card" style="cursor:pointer; transition: transform 0.25s, box-shadow 0.25s;"
+                             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 14px 30px rgba(24,194,74,0.15)';"
+                             onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                            <div class="card-img-top">
+                                @php
+                                    $iconMap = [
+                                        'Car'                  => 'fa-car',
+                                        'SUV'                  => 'fa-truck-pickup',
+                                        'Van'                  => 'fa-van-shuttle',
+                                        'Truck'                => 'fa-truck',
+                                        'Motorcycle'           => 'fa-motorcycle',
+                                        'Bicycle'              => 'fa-bicycle',
+                                        'Agricultural Vehicle' => 'fa-tractor',
+                                        'Construction Vehicle' => 'fa-helmet-safety',
+                                        'Camper Vehicle'       => 'fa-caravan',
+                                    ];
+                                    $icon = $iconMap[$vehicle->vehicle_category] ?? 'fa-car';
+                                @endphp
+                                <i class="fa-solid {{ $icon }}"></i>
                             </div>
-                            <div class="vehicle-meta mt-1">
-                                <i class="fa-solid fa-circle-check" style="color: var(--primary-green);"></i>
-                                <span style="color: var(--primary-green); font-weight: 600;">Available</span>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
-                                <div>
-                                    <div style="font-size: 0.72rem; color: var(--text-muted);">
-                                        <i class="fa-solid fa-calendar-days me-1"></i>
-                                        {{ \Carbon\Carbon::parse(request('pickup_date'))->format('d M') }}
-                                        →
-                                        {{ \Carbon\Carbon::parse(request('dropoff_date'))->format('d M') }}
-                                    </div>
+                            <div class="card-body">
+                                <span class="badge-cat" style="display:inline-block; background:#e8faf0; color:var(--primary-green); font-size:0.7rem; font-weight:600; border-radius:20px; padding:3px 10px; margin-bottom:8px;">
+                                    {{ $vehicle->vehicle_category }}
+                                </span>
+                                <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">
+                                    {{ $vehicle->brand }} {{ $vehicle->model }}
+                                </h6>
+                                <div class="vehicle-meta">
+                                    <i class="fa-solid fa-location-dot"></i> {{ $vehicle->location }}
                                 </div>
-                                <button class="btn btn-sm" style="background:#e8faf0; color:var(--primary-green); font-weight:700; border-radius:20px; padding:6px 14px; font-size:0.75rem; border: none;">
-                                    Book Now
-                                </button>
+                                <div class="vehicle-meta mt-1">
+                                    <i class="fa-solid fa-circle-check" style="color: var(--primary-green);"></i>
+                                    <span style="color: var(--primary-green); font-weight: 600;">Available</span>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
+                                    <div>
+                                        <div style="font-size: 0.72rem; color: var(--text-muted);">
+                                            <i class="fa-solid fa-calendar-days me-1"></i>
+                                            {{ \Carbon\Carbon::parse(request('pickup_date'))->format('d M') }}
+                                            →
+                                            {{ \Carbon\Carbon::parse(request('dropoff_date'))->format('d M') }}
+                                        </div>
+                                    </div>
+                                    <span class="btn btn-sm" style="background:#e8faf0; color:var(--primary-green); font-weight:700; border-radius:20px; padding:6px 14px; font-size:0.75rem; border: none;">
+                                        Book Now
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 @endforeach
             </div>

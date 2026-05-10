@@ -21,10 +21,7 @@ class UserhomepageController extends Controller
                 $query->where('vehicle_category', 'like', '%' . $request->vehicle_type . '%');
             }
 
-            // Location filter — smart two-level handling
-            // When the user picks "All of Galle" from the dropdown, the hidden input
-            // sends "Galle" (stripped). When they pick a specific town like "Hikkaduwa",
-            // it sends "Hikkaduwa". An empty value (All of Sri Lanka) skips filtering.
+            // Location filter
             if ($request->filled('location')) {
                 $query->where('location', 'like', '%' . $request->location . '%');
             }
@@ -37,7 +34,6 @@ class UserhomepageController extends Controller
 
     public function category(string $category)
     {
-        // Map URL-friendly slug back to the DB value
         $categoryMap = [
             'bicycles'               => 'Bicycle',
             'motorcycles'            => 'Motorcycle',
@@ -53,11 +49,17 @@ class UserhomepageController extends Controller
 
         $dbCategory = $categoryMap[strtolower($category)] ?? $category;
 
-        // Newest listings first (latest created_at at the top)
         $vehicles = Vehicle::where('vehicle_category', $dbCategory)
                            ->orderBy('created_at', 'desc')
                            ->get();
 
         return view('userhomepage.category', compact('vehicles', 'dbCategory'));
+    }
+
+    public function show(int $id)
+    {
+        $vehicle = Vehicle::findOrFail($id);
+
+        return view('userhomepage.show', compact('vehicle'));
     }
 }
