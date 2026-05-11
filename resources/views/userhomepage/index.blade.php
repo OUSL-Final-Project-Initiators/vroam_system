@@ -90,6 +90,79 @@
     }
     .btn-show-vehicles:hover { background: var(--dark-green); }
 
+    /* ── Location Dropdown ── */
+    .loc-trigger {
+        cursor: pointer;
+        user-select: none;
+    }
+    .loc-trigger .form-control {
+        cursor: pointer;
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .loc-panel {
+        display: none;
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+        z-index: 9999;
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+    .loc-panel::-webkit-scrollbar { width: 4px; }
+    .loc-panel::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+    .loc-panel.open { display: block; }
+    .loc-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 14px;
+        cursor: pointer;
+        font-size: 0.84rem;
+        color: #333;
+        border-bottom: 1px solid #f5f5f5;
+        transition: background 0.12s;
+    }
+    .loc-item:last-child { border-bottom: none; }
+    .loc-item:hover { background: #f0faf5; }
+    .loc-item.all-opt {
+        font-weight: 700;
+        background: #f8fffe;
+        border-bottom: 1px solid #e0f5ec;
+        color: var(--primary-green, #18c24a);
+    }
+    .loc-item.all-opt:hover { background: #e8faf0; }
+    .loc-item.back-opt {
+        color: #888;
+        font-size: 0.8rem;
+        border-bottom: 1px solid #eee;
+        background: #fafafa;
+    }
+    .loc-item.back-opt:hover { background: #f0f0f0; }
+    .loc-section-lbl {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #aaa;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 8px 14px 4px;
+        background: #fff;
+    }
+    .loc-chevron-right {
+        margin-left: auto;
+        font-size: 0.65rem;
+        color: #bbb;
+    }
+    .loc-caret { font-size: 0.7rem; transition: transform 0.2s; }
+    .loc-caret.open { transform: rotate(180deg); }
+
     /* ── Section Header ── */
     .section-header { text-align: center; margin-bottom: 42px; }
     .section-header h2 { font-size: 1.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
@@ -328,11 +401,13 @@
 
         <!-- Search Box -->
         <div class="search-container">
-            <form action="{{ route('user.index') }}" method="GET">
+            <form action="{{ route('user.index') }}" method="GET" id="searchForm">
                 <div class="search-box">
                     <div class="row g-3 align-items-end">
+
+                        {{-- Vehicle Type --}}
                         <div class="col-md-2">
-                            <label><i class="fa-solid fa-list me-1"></i> Vehicle Type</label>
+                            <label><i class="fa-solid fa-list me-1"></i> Vehicle Category</label>
                             <select class="form-select form-select-sm" name="vehicle_type">
                                 <option value="">Select Category</option>
                                 <option value="Bicycle"              {{ request('vehicle_type') == 'Bicycle'              ? 'selected' : '' }}>Bicycles</option>
@@ -346,29 +421,52 @@
                                 <option value="Camper Vehicle"       {{ request('vehicle_type') == 'Camper Vehicle'       ? 'selected' : '' }}>Camper Vehicles</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label><i class="fa-solid fa-location-dot me-1"></i> Pick-up Location</label>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="fa-solid fa-map-pin text-muted"></i></span>
-                                <input type="text" class="form-control" name="location"
-                                       placeholder="City or address" value="{{ request('location') }}">
+
+                        {{-- Pick-up Location (two-level dropdown) --}}
+                        <div class="col-md-3" style="position: relative;">
+                            <label><i class="fa-solid fa-location-dot me-1"></i> Location</label>
+
+                            {{-- Visible trigger button --}}
+                            <div class="input-group input-group-sm loc-trigger" id="locTrigger">
+                                <span class="input-group-text">
+                                    <i class="fa-solid fa-map-pin text-muted"></i>
+                                </span>
+                                <span class="form-control" id="locDisplay" style="color:#6c757d; cursor:pointer;">
+                                    <span id="locLabel">Select location…</span>
+                                    <i class="fa-solid fa-chevron-down loc-caret ms-auto" id="locCaret"></i>
+                                </span>
+                            </div>
+
+                            {{-- Hidden input submitted with form --}}
+                            <input type="hidden" name="location" id="locationValue" value="{{ request('location') }}">
+
+                            {{-- Dropdown panel --}}
+                            <div class="loc-panel" id="locPanel">
+                                <div id="locPanelInner"></div>
                             </div>
                         </div>
+
+                        {{-- Pick-up Date & Time --}}
                         <div class="col-md-2">
-                            <label><i class="fa-solid fa-calendar me-1"></i> Pick-up Date & Time</label>
+                            <label><i class="fa-solid fa-calendar me-1"></i> Pick Date & Time</label>
                             <input type="datetime-local" class="form-control form-control-sm"
                                    name="pickup_date" value="{{ request('pickup_date') }}">
                         </div>
+
+                        {{-- Drop-off Date & Time --}}
                         <div class="col-md-2">
-                            <label><i class="fa-solid fa-calendar-check me-1"></i> Drop-off Date & Time</label>
+                            <label><i class="fa-solid fa-calendar-check me-1"></i> Drop Date & Time</label>
                             <input type="datetime-local" class="form-control form-control-sm"
                                    name="dropoff_date" value="{{ request('dropoff_date') }}">
                         </div>
+
+                        {{-- Submit --}}
                         <div class="col-md-3 d-flex align-items-end">
                             <button type="submit" class="btn-show-vehicles fw-bold py-2">
                                 <i class="fa-solid fa-magnifying-glass me-2"></i>Show Vehicles
                             </button>
                         </div>
+
                     </div>
                 </div>
             </form>
@@ -401,53 +499,57 @@
             <div class="row g-4">
                 @foreach($vehicles as $vehicle)
                 <div class="col-md-3 col-sm-6">
-                    <div class="result-vehicle-card">
-                        <div class="card-img-top">
-                            @php
-                                $iconMap = [
-                                    'Car'                  => 'fa-car',
-                                    'SUV'                  => 'fa-truck-pickup',
-                                    'Van'                  => 'fa-van-shuttle',
-                                    'Truck'                => 'fa-truck',
-                                    'Motorcycle'           => 'fa-motorcycle',
-                                    'Bicycle'              => 'fa-bicycle',
-                                    'Agricultural Vehicle' => 'fa-tractor',
-                                    'Construction Vehicle' => 'fa-helmet-safety',
-                                    'Camper Vehicle'       => 'fa-caravan',
-                                ];
-                                $icon = $iconMap[$vehicle->vehicle_category] ?? 'fa-car';
-                            @endphp
-                            <i class="fa-solid {{ $icon }}"></i>
-                        </div>
-                        <div class="card-body">
-                            <span class="badge-cat" style="display:inline-block; background:#e8faf0; color:var(--primary-green); font-size:0.7rem; font-weight:600; border-radius:20px; padding:3px 10px; margin-bottom:8px;">
-                                {{ $vehicle->vehicle_category }}
-                            </span>
-                            <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">
-                                {{ $vehicle->brand }} {{ $vehicle->model }}
-                            </h6>
-                            <div class="vehicle-meta">
-                                <i class="fa-solid fa-location-dot"></i> {{ $vehicle->location }}
+                    <a href="{{ route('user.show', $vehicle->id) }}" style="text-decoration:none; color:inherit; display:block; height:100%;">
+                        <div class="result-vehicle-card" style="cursor:pointer; transition: transform 0.25s, box-shadow 0.25s;"
+                             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 14px 30px rgba(24,194,74,0.15)';"
+                             onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                            <div class="card-img-top">
+                                @php
+                                    $iconMap = [
+                                        'Car'                  => 'fa-car',
+                                        'SUV'                  => 'fa-truck-pickup',
+                                        'Van'                  => 'fa-van-shuttle',
+                                        'Truck'                => 'fa-truck',
+                                        'Motorcycle'           => 'fa-motorcycle',
+                                        'Bicycle'              => 'fa-bicycle',
+                                        'Agricultural Vehicle' => 'fa-tractor',
+                                        'Construction Vehicle' => 'fa-helmet-safety',
+                                        'Camper Vehicle'       => 'fa-caravan',
+                                    ];
+                                    $icon = $iconMap[$vehicle->vehicle_category] ?? 'fa-car';
+                                @endphp
+                                <i class="fa-solid {{ $icon }}"></i>
                             </div>
-                            <div class="vehicle-meta mt-1">
-                                <i class="fa-solid fa-circle-check" style="color: var(--primary-green);"></i>
-                                <span style="color: var(--primary-green); font-weight: 600;">Available</span>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
-                                <div>
-                                    <div style="font-size: 0.72rem; color: var(--text-muted);">
-                                        <i class="fa-solid fa-calendar-days me-1"></i>
-                                        {{ \Carbon\Carbon::parse(request('pickup_date'))->format('d M') }}
-                                        →
-                                        {{ \Carbon\Carbon::parse(request('dropoff_date'))->format('d M') }}
-                                    </div>
+                            <div class="card-body">
+                                <span class="badge-cat" style="display:inline-block; background:#e8faf0; color:var(--primary-green); font-size:0.7rem; font-weight:600; border-radius:20px; padding:3px 10px; margin-bottom:8px;">
+                                    {{ $vehicle->vehicle_category }}
+                                </span>
+                                <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">
+                                    {{ $vehicle->brand }} {{ $vehicle->model }}
+                                </h6>
+                                <div class="vehicle-meta">
+                                    <i class="fa-solid fa-location-dot"></i> {{ $vehicle->location }}
                                 </div>
-                                <button class="btn btn-sm" style="background:#e8faf0; color:var(--primary-green); font-weight:700; border-radius:20px; padding:6px 14px; font-size:0.75rem; border: none;">
-                                    Book Now
-                                </button>
+                                <div class="vehicle-meta mt-1">
+                                    <i class="fa-solid fa-circle-check" style="color: var(--primary-green);"></i>
+                                    <span style="color: var(--primary-green); font-weight: 600;">Available</span>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
+                                    <div>
+                                        <div style="font-size: 0.72rem; color: var(--text-muted);">
+                                            <i class="fa-solid fa-calendar-days me-1"></i>
+                                            {{ \Carbon\Carbon::parse(request('pickup_date'))->format('d M') }}
+                                            →
+                                            {{ \Carbon\Carbon::parse(request('dropoff_date'))->format('d M') }}
+                                        </div>
+                                    </div>
+                                    <span class="btn btn-sm" style="background:#e8faf0; color:var(--primary-green); font-weight:700; border-radius:20px; padding:6px 14px; font-size:0.75rem; border: none;">
+                                        Book Now
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 @endforeach
             </div>
@@ -571,50 +673,69 @@
             <p>Discover our most popular vehicles trusted and loved by our customers</p>
             <div class="green-line"></div>
         </div>
+        @php
+            $topIconMap = [
+                'Car'                  => 'fa-car',
+                'SUV'                  => 'fa-truck-pickup',
+                'Van'                  => 'fa-van-shuttle',
+                'Truck'                => 'fa-truck',
+                'Motorcycle'           => 'fa-motorcycle',
+                'Bicycle'              => 'fa-bicycle',
+                'Agricultural Vehicle' => 'fa-tractor',
+                'Construction Vehicle' => 'fa-helmet-safety',
+                'Camper Vehicle'       => 'fa-caravan',
+                'Special Vehicle'      => 'fa-star',
+            ];
+        @endphp
+        @if($topVehicles->isEmpty())
+            <p class="text-center text-muted" style="font-size:0.88rem;">No bookings yet — top picks will appear here once vehicles are booked.</p>
+        @else
         <div class="row g-4">
-            @php
-                $topVehicles = [
-                    ['name'=>'Toyota Axio',          'cat'=>'Car',        'img'=>'Toyota Axio.png',  'price'=>'3,500', 'location'=>'Colombo', 'rating'=>4.8, 'reviews'=>124, 'seats'=>5, 'fuel'=>'Petrol'],
-                    ['name'=>'Toyota Prado TX',      'cat'=>'SUV',        'img'=>'Prado TX.png',     'price'=>'8,500', 'location'=>'Kandy',   'rating'=>4.9, 'reviews'=>98,  'seats'=>7, 'fuel'=>'Diesel'],
-                    ['name'=>'Suzuki Wagon R Euro 2','cat'=>'Car',        'img'=>'Untitled design (26).png', 'price'=>'2,800', 'location'=>'Galle', 'rating'=>4.6, 'reviews'=>76, 'seats'=>5, 'fuel'=>'Petrol'],
-                    ['name'=>'Yamaha R15',           'cat'=>'Motorcycle', 'img'=>'Yamaha R15.png',   'price'=>'1,200', 'location'=>'Negombo', 'rating'=>4.7, 'reviews'=>54,  'seats'=>2, 'fuel'=>'Petrol'],
-                ];
-            @endphp
             @foreach($topVehicles as $v)
             <div class="col-md-3 col-sm-6">
-                <div class="vehicle-card">
-                    <img src="{{ asset('assests/images/' . $v['img']) }}" alt="{{ $v['name'] }}"
-                         style="width:100%; height:160px; object-fit:contain; background:#f8f9fa; padding:10px;"
-                         onerror="this.style.objectFit='cover'; this.src='https://via.placeholder.com/400x160?text={{ urlencode($v['name']) }}'">
-                    <div class="vehicle-card-body">
-                        <span class="badge-cat">{{ $v['cat'] }}</span>
-                        <h6>{{ $v['name'] }}</h6>
-                        <div class="vehicle-meta">
-                            <i class="fa-solid fa-location-dot"></i>{{ $v['location'] }} &nbsp;
-                            <i class="fa-solid fa-gas-pump"></i>{{ $v['fuel'] }} &nbsp;
-                            <i class="fa-solid fa-user-group"></i>{{ $v['seats'] }} Seats
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between pt-2 border-top mt-2">
-                            <div>
-                                <div class="price">LKR {{ $v['price'] }} <span>/ day</span></div>
-                                <div class="stars mt-1">
-                                    @for($i=1;$i<=5;$i++)
-                                        @if($i <= floor($v['rating']))
-                                            <i class="fa-solid fa-star"></i>
-                                        @else
-                                            <i class="fa-regular fa-star"></i>
-                                        @endif
-                                    @endfor
-                                    <small class="text-muted ms-1">{{ $v['rating'] }} ({{ $v['reviews'] }})</small>
-                                </div>
+                <a href="{{ route('user.show', $v->id) }}" style="text-decoration:none; color:inherit;">
+                    <div class="vehicle-card" style="cursor:pointer; transition: transform 0.25s, box-shadow 0.25s;"
+                         onmouseover="this.style.transform='translateY(-6px)'; this.style.boxShadow='0 16px 32px rgba(24,194,74,0.15)';"
+                         onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                        {{-- Icon placeholder (no images in DB) --}}
+                        <div style="height:160px; background:#f0faf4; display:flex; align-items:center; justify-content:center;">
+                            <div style="width:90px; height:90px; background:#e8faf0; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                <i class="fa-solid {{ $topIconMap[$v->vehicle_category] ?? 'fa-car' }}"
+                                   style="font-size:2.4rem; color:var(--primary-green); opacity:0.8;"></i>
                             </div>
-                            <button class="btn btn-sm" style="background:#e8faf0; color:var(--primary-green); font-weight:700; border-radius:20px; padding:6px 14px; font-size:0.75rem;">Book</button>
+                        </div>
+                        <div class="vehicle-card-body">
+                            <span class="badge-cat">{{ $v->vehicle_category }}</span>
+                            <h6>{{ $v->brand }} {{ $v->model }}</h6>
+                            <div class="vehicle-meta">
+                                <i class="fa-solid fa-location-dot"></i>{{ $v->location }}
+                            </div>
+                            <div class="vehicle-meta mt-1">
+                                @if($v->status === 'available')
+                                    <i class="fa-solid fa-circle-check" style="color:var(--primary-green);"></i>
+                                    <span style="color:var(--primary-green); font-weight:600;">Available</span>
+                                @else
+                                    <i class="fa-solid fa-clock" style="color:#e65c00;"></i>
+                                    <span style="color:#e65c00; font-weight:600;">{{ ucfirst($v->status) }}</span>
+                                @endif
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between pt-2 border-top mt-2">
+                                <div>
+                                    <div style="font-size:0.75rem; color:var(--primary-green); font-weight:700;">
+                                        <i class="fa-solid fa-fire me-1"></i>{{ $v->bookings_count }} {{ Str::plural('booking', $v->bookings_count) }}
+                                    </div>
+                                </div>
+                                <span class="btn btn-sm" style="background:#e8faf0; color:var(--primary-green); font-weight:700; border-radius:20px; padding:6px 14px; font-size:0.75rem;">
+                                    View
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             @endforeach
         </div>
+        @endif
     </div>
 </section>
 
@@ -725,14 +846,167 @@
 @endsection
 
 @push('scripts')
+<script>
+(function () {
+    /* ─────────────────────────────────────────────
+       Sri Lanka Districts → Towns data
+    ───────────────────────────────────────────── */
+    var SL = {
+        'Colombo':      { label: 'Colombo District',      towns: ['All of Colombo','Colombo City','Dehiwala','Moratuwa','Sri Jayawardenepura Kotte','Kolonnawa','Maharagama','Nugegoda','Ratmalana','Homagama','Kaduwela','Kesbewa','Avissawella','Hanwella'] },
+        'Gampaha':      { label: 'Gampaha District',      towns: ['All of Gampaha','Gampaha City','Negombo','Ja-Ela','Wattala','Ragama','Kelaniya','Minuwangoda','Katunayake','Divulapitiya','Mirigama','Veyangoda','Nittambuwa'] },
+        'Kalutara':     { label: 'Kalutara District',     towns: ['All of Kalutara','Kalutara City','Beruwala','Aluthgama','Matugama','Bandaragama','Horana','Panadura','Ingiriya','Bulathsinhala'] },
+        'Kandy':        { label: 'Kandy District',        towns: ['All of Kandy','Kandy City','Peradeniya','Katugastota','Gampola','Nawalapitiya','Wattegama','Kundasale','Teldeniya','Akurana','Hatton'] },
+        'Matale':       { label: 'Matale District',       towns: ['All of Matale','Matale City','Dambulla','Sigiriya','Rattota','Ukuwela','Galewela','Pallepola'] },
+        'NuwaraEliya':  { label: 'Nuwara Eliya District', towns: ['All of Nuwara Eliya','Nuwara Eliya City','Hatton','Talawakele','Ginigathena','Maskeliya','Ragala'] },
+        'Galle':        { label: 'Galle District',        towns: ['All of Galle','Galle City','Ambalangoda','Elpitiya','Hikkaduwa','Baddegama','Karandeniya','Bentota','Balapitiya','Ahangama','Unawatuna','Weligama'] },
+        'Matara':       { label: 'Matara District',       towns: ['All of Matara','Matara City','Weligama','Mirissa','Akuressa','Hakmana','Deniyaya','Kamburupitiya','Dikwella'] },
+        'Hambantota':   { label: 'Hambantota District',   towns: ['All of Hambantota','Hambantota City','Tangalle','Tissamaharama','Beliatta','Sooriyawewa','Weeraketiya','Ambalantota'] },
+        'Jaffna':       { label: 'Jaffna District',       towns: ['All of Jaffna','Jaffna City','Chavakachcheri','Point Pedro','Nallur','Tellippalai','Kopay'] },
+        'Kilinochchi':  { label: 'Kilinochchi District',  towns: ['All of Kilinochchi','Kilinochchi City','Paranthan','Kandavalai'] },
+        'Mannar':       { label: 'Mannar District',       towns: ['All of Mannar','Mannar City','Murunkan','Nanattan'] },
+        'Vavuniya':     { label: 'Vavuniya District',     towns: ['All of Vavuniya','Vavuniya City','Cheddikulam','Nedunkeni'] },
+        'Mullaitivu':   { label: 'Mullaitivu District',   towns: ['All of Mullaitivu','Mullaitivu City','Oddusuddan','Puthukudiyiruppu'] },
+        'Batticaloa':   { label: 'Batticaloa District',   towns: ['All of Batticaloa','Batticaloa City','Kattankudy','Eravur','Valaichchenai','Kalmunai'] },
+        'Ampara':       { label: 'Ampara District',       towns: ['All of Ampara','Ampara City','Kalmunai','Sainthamaruthu','Akkarepattu','Dehiattakandiya','Uhana','Mahaoya'] },
+        'Trincomalee':  { label: 'Trincomalee District',  towns: ['All of Trincomalee','Trincomalee City','Kinniya','Muttur','Kantale','Seruvila'] },
+        'Kurunegala':   { label: 'Kurunegala District',   towns: ['All of Kurunegala','Kurunegala City','Kuliyapitiya','Mawathagama','Nikaweratiya','Pannala','Wariyapola','Polgahawela','Giriulla'] },
+        'Puttalam':     { label: 'Puttalam District',     towns: ['All of Puttalam','Puttalam City','Chilaw','Wennappuwa','Anamaduwa','Nattandiya','Dankotuwa'] },
+        'Anuradhapura': { label: 'Anuradhapura District', towns: ['All of Anuradhapura','Anuradhapura City','Medawachchiya','Nochchiyagama','Mihintale','Kekirawa','Tambuttegama','Galnewa','Eppawala'] },
+        'Polonnaruwa':  { label: 'Polonnaruwa District',  towns: ['All of Polonnaruwa','Polonnaruwa City','Hingurakgoda','Medirigiriya','Manampitiya','Lankapura'] },
+        'Badulla':      { label: 'Badulla District',      towns: ['All of Badulla','Badulla City','Bandarawela','Haputale','Welimada','Mahiyanganaya','Passara','Ella','Hali-Ela'] },
+        'Moneragala':   { label: 'Moneragala District',   towns: ['All of Moneragala','Moneragala City','Wellawaya','Buttala','Bibile','Medagama','Siyambalanduwa'] },
+        'Ratnapura':    { label: 'Ratnapura District',    towns: ['All of Ratnapura','Ratnapura City','Balangoda','Embilipitiya','Kuruwita','Eheliyagoda','Pelmadulla','Ayagama'] },
+        'Kegalle':      { label: 'Kegalle District',      towns: ['All of Kegalle','Kegalle City','Mawanella','Warakapola','Rambukkana','Ruwanwella','Dehiovita','Aranayake','Yatiyanthota'] },
+    };
+
+    /* ── Element refs ── */
+    var trigger   = document.getElementById('locTrigger');
+    var panel     = document.getElementById('locPanel');
+    var inner     = document.getElementById('locPanelInner');
+    var labelEl   = document.getElementById('locLabel');
+    var caret     = document.getElementById('locCaret');
+    var hidden    = document.getElementById('locationValue');
+    var isOpen    = false;
+
+    /* ── Restore display label on page reload after search ── */
+    var existing = hidden.value;
+    if (existing) {
+        labelEl.textContent = existing;
+        labelEl.style.color = '#212529';
+    }
+
+    /* ── Open / Close ── */
+    function openPanel() {
+        isOpen = true;
+        panel.classList.add('open');
+        caret.classList.add('open');
+        renderDistricts();
+    }
+    function closePanel() {
+        isOpen = false;
+        panel.classList.remove('open');
+        caret.classList.remove('open');
+    }
+
+    trigger.addEventListener('click', function () {
+        isOpen ? closePanel() : openPanel();
+    });
+
+    /* Close when clicking outside */
+    document.addEventListener('click', function (e) {
+        var wrap = document.getElementById('locTrigger').closest('.col-md-3');
+        if (wrap && !wrap.contains(e.target)) closePanel();
+    });
+
+    /* ── Select a value ── */
+    function selectValue(displayText, inputVal) {
+        labelEl.textContent = displayText;
+        labelEl.style.color = '#212529';
+        hidden.value = inputVal;
+        closePanel();
+    }
+
+    /* ── Build a single row element ── */
+    function makeItem(html, classes, onClick) {
+        var el = document.createElement('div');
+        el.className = 'loc-item ' + (classes || '');
+        el.innerHTML = html;
+        el.addEventListener('click', function (e) { e.stopPropagation(); onClick(); });
+        return el;
+    }
+
+    /* ── Level 1: Districts ── */
+    function renderDistricts() {
+        inner.innerHTML = '';
+
+        /* "All of Sri Lanka" */
+        inner.appendChild(makeItem(
+            '<i class="fa-solid fa-globe fa-fw"></i> All of Sri Lanka',
+            'all-opt',
+            function () { selectValue('All of Sri Lanka', ''); }
+        ));
+
+        /* Section label */
+        var lbl = document.createElement('div');
+        lbl.className = 'loc-section-lbl';
+        lbl.textContent = 'Select District';
+        inner.appendChild(lbl);
+
+        /* Each district */
+        Object.keys(SL).forEach(function (key) {
+            inner.appendChild(makeItem(
+                '<i class="fa-solid fa-map fa-fw"></i> ' + SL[key].label +
+                '<i class="fa-solid fa-chevron-right fa-fw loc-chevron-right"></i>',
+                '',
+                function () { renderTowns(key); }
+            ));
+        });
+    }
+
+    /* ── Level 2: Towns ── */
+    function renderTowns(key) {
+        var district = SL[key];
+        inner.innerHTML = '';
+
+        /* Back button */
+        inner.appendChild(makeItem(
+            '<i class="fa-solid fa-arrow-left fa-fw"></i> Back to districts',
+            'back-opt',
+            renderDistricts
+        ));
+
+        /* Section label */
+        var lbl = document.createElement('div');
+        lbl.className = 'loc-section-lbl';
+        lbl.textContent = district.label;
+        inner.appendChild(lbl);
+
+        /* Each town */
+        district.towns.forEach(function (town, idx) {
+            var isAll = idx === 0;
+            // "All of Galle"  → strips "All of "  → sends "Galle"   (matches all in district)
+            // "Colombo City"  → strips " City"    → sends "Colombo" (matches DB value)
+            // "Hikkaduwa"     → no change         → sends "Hikkaduwa"
+            var submitVal = isAll
+                ? town.replace('All of ', '')
+                : town.replace(' City', '');
+
+            inner.appendChild(makeItem(
+                '<i class="fa-solid ' + (isAll ? 'fa-map' : 'fa-map-pin') + ' fa-fw"></i> ' + town,
+                isAll ? 'all-opt' : '',
+                function () { selectValue(town, submitVal); }
+            ));
+        });
+    }
+})();
+</script>
+
 {{-- Auto-scroll to results after search --}}
 @if($searched)
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const results = document.getElementById('search-results');
-        if (results) {
-            results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        var results = document.getElementById('search-results');
+        if (results) results.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 </script>
 @endif

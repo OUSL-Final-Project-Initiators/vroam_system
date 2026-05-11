@@ -88,6 +88,12 @@
 
     /* ── Vehicle Cards ── */
     .vehicle-grid { padding: 36px 0 60px; }
+    .vehicle-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+    }
     .vehicle-card {
         background: white;
         border-radius: 16px;
@@ -98,6 +104,7 @@
         box-shadow: 0 2px 12px rgba(0,0,0,0.05);
         position: relative;
         animation: fadeUp 0.4s ease both;
+        cursor: pointer;
     }
     .vehicle-card:hover {
         transform: translateY(-7px);
@@ -283,64 +290,68 @@
                      data-brand="{{ $vehicle->brand }}"
                      data-index="{{ $index }}"
                      style="animation-delay: {{ $index * 0.05 }}s">
-                    <div class="vehicle-card h-100">
 
-                        @if($index < 3)
-                            <span class="badge-new">✦ New</span>
-                        @endif
+                    {{-- Entire card is a link to the vehicle detail page --}}
+                    <a href="{{ route('user.show', $vehicle->id) }}" class="vehicle-card-link">
+                        <div class="vehicle-card h-100">
 
-                        <div class="card-icon-wrap"
-                             style="background: {{ $vehicle->status === 'available' ? '#f0faf4' : ($vehicle->status === 'rented' ? '#fff8f0' : '#fdf0f0') }};">
-                            <div class="bg-circle">
-                                <i class="fa-solid {{ $heroIcon }}"></i>
+                            @if($index < 3)
+                                <span class="badge-new">✦ New</span>
+                            @endif
+
+                            <div class="card-icon-wrap"
+                                 style="background: {{ $vehicle->status === 'available' ? '#f0faf4' : ($vehicle->status === 'rented' ? '#fff8f0' : '#fdf0f0') }};">
+                                <div class="bg-circle">
+                                    <i class="fa-solid {{ $heroIcon }}"></i>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="card-body-inner">
-                            <div>
-                                <span class="badge-cat">{{ $vehicle->vehicle_category }}</span>
+                            <div class="card-body-inner">
+                                <div>
+                                    <span class="badge-cat">{{ $vehicle->vehicle_category }}</span>
+                                    @if($vehicle->status === 'available')
+                                        <span class="badge-status-available">
+                                            <i class="fa-solid fa-circle-check"></i> Available
+                                        </span>
+                                    @elseif($vehicle->status === 'rented')
+                                        <span class="badge-status-rented">
+                                            <i class="fa-solid fa-clock"></i> Rented
+                                        </span>
+                                    @else
+                                        <span class="badge-status-maintenance">
+                                            <i class="fa-solid fa-wrench"></i> Maintenance
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="vehicle-name">{{ $vehicle->brand }} {{ $vehicle->model }}</div>
+                                <div class="vehicle-meta">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    <span>{{ $vehicle->location }}</span>
+                                </div>
+                                <div class="vehicle-meta">
+                                    <i class="fa-solid fa-tag"></i>
+                                    <span>{{ $vehicle->brand }}</span>
+                                </div>
+                            </div>
+
+                            <div class="card-footer-inner">
+                                <div class="listing-date">
+                                    <i class="fa-regular fa-clock"></i>
+                                    {{ $vehicle->created_at ? $vehicle->created_at->diffForHumans() : 'Recently listed' }}
+                                </div>
                                 @if($vehicle->status === 'available')
-                                    <span class="badge-status-available">
-                                        <i class="fa-solid fa-circle-check"></i> Available
-                                    </span>
-                                @elseif($vehicle->status === 'rented')
-                                    <span class="badge-status-rented">
-                                        <i class="fa-solid fa-clock"></i> Rented
+                                    <span class="btn-book">
+                                        <i class="fa-solid fa-bolt me-1"></i> Book Now
                                     </span>
                                 @else
-                                    <span class="badge-status-maintenance">
-                                        <i class="fa-solid fa-wrench"></i> Maintenance
+                                    <span class="btn-book disabled-btn">
+                                        {{ ucfirst($vehicle->status) }}
                                     </span>
                                 @endif
                             </div>
-                            <div class="vehicle-name">{{ $vehicle->brand }} {{ $vehicle->model }}</div>
-                            <div class="vehicle-meta">
-                                <i class="fa-solid fa-location-dot"></i>
-                                <span>{{ $vehicle->location }}</span>
-                            </div>
-                            <div class="vehicle-meta">
-                                <i class="fa-solid fa-tag"></i>
-                                <span>{{ $vehicle->brand }}</span>
-                            </div>
-                        </div>
 
-                        <div class="card-footer-inner">
-                            <div class="listing-date">
-                                <i class="fa-regular fa-clock"></i>
-                                {{ $vehicle->created_at ? $vehicle->created_at->diffForHumans() : 'Recently listed' }}
-                            </div>
-                            @if($vehicle->status === 'available')
-                                <button class="btn-book">
-                                    <i class="fa-solid fa-bolt me-1"></i> Book Now
-                                </button>
-                            @else
-                                <button class="btn-book disabled-btn" disabled>
-                                    {{ ucfirst($vehicle->status) }}
-                                </button>
-                            @endif
                         </div>
-
-                    </div>
+                    </a>
                 </div>
                 @endforeach
             </div>

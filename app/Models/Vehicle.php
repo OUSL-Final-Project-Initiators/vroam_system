@@ -13,4 +13,9 @@ class Vehicle extends Model
         'model',
         'status',
     ];
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
 }
